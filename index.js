@@ -1,11 +1,22 @@
-const express = require("express");
+const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
-app.get("/", (req, res) => {
-  res.send("🚀 ReviewSpark backend is live!");
+// Middleware
+app.use(express.json());
+
+// Import your route
+const sendInviteRoute = require('./routes/sendInvite');
+
+// Mount route under /api
+app.use('/api', sendInviteRoute);
+
+// Default route
+app.get('/', (req, res) => {
+  res.send('🚀 ReviewSpark backend is live!');
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
