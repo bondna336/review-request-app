@@ -1,33 +1,33 @@
 const express = require('express');
 const router = express.Router();
-const supabase = require('../lib/supabaseClient'); // import your client
+const { createClient } = require('@supabase/supabase-js');
 
+// Initialize Supabase
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE);
+
+// POST /api/send-invite
 router.post('/send-invite', async (req, res) => {
-  try {
-    const { name, email, phone, send_method } = req.body;
+  const { name, email, phone, send_method } = req.body;
 
-    // Insert into Supabase 'customers' table
-    const { error } = await supabase.from('customers').insert([
+  try {
+    // Insert new customer into Supabase
+    const { data, error } = await supabase.from('customers').insert([
       {
         name,
         email,
         phone,
         send_method,
-        send_date: new Date(), // store current timestamp
-        campaign_type: 'manual',
+        send_date: new Date(),
         status: 'pending',
-        review_site_visited: false,
+        campaign_type: 'default'
       }
     ]);
 
-    if (error) {
-      console.error('Supabase insert error:', error);
-      return res.status(500).json({ error: 'Failed to insert into Supabase' });
-    }
+    if (error) throw error;
 
-    res.status(200).json({ message: `Invitation sent to ${name}` });
+    res.status(200).json({ message: `✅ Invitation saved for ${name}` });
   } catch (err) {
-    console.error('Error sending invite:', err);
+    console.error('Error saving invite:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
